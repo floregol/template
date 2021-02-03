@@ -1,16 +1,14 @@
-
-from code.run_experiment import run
+#
+from src.run_experiment import run
 import os
 current_dir = os.getcwd()
 
 # todo result_path arguments from input
-test_run = False # check that all storing is properly set up
-cpu_mp = True
-cores = 4
-num_trials = 10
-data_path = os.path.join(current_dir,'data')
-result_path = os.path.join(current_dir,'results')
 
-run(cpu_mp, cores, num_trials, data_path, result_path)
+data_path = os.path.join(current_dir, 'data')
+result_path = os.path.join(current_dir, 'results')
+run_configuration = {'run_mode': 'multi_trials',  # test_mode, multi_trials, hp_tuning
+                     'cpu_mp': False, 'cores': 4, 'num_trials': 10, 'model': 'FCFlow'}
+data_configuration = {'dataset_name': 'elec', 'horizon': 12, 'history': 12}
 
-
+run(data_path, result_path, run_configuration, data_configuration)
