@@ -6,7 +6,7 @@ from src.model.lstm_model import run_lstm
 from src.model.fcflow_model import run_fcflow, run_fcgaga
 from src.model.gruflow_model import run_gruflow
 from src.model.hyperparameter import FCParameters, FCFlowParameters
-from src.plotting import visualize_dataset
+#from src.plotting import visualize_dataset
 
 fc_hyperparams = FCParameters(epochs=2,
                               steps_per_epoch=3,
