@@ -1,15 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import os
-from src.model.hyperparameter import FCParameters, FCFlowParameters
-from src.model.fcgaga.FCGAGA import FcGaga
+from src.model.hyperparameter import LSTMParameters, FCFlowParameters
 import tensorflow_probability as tfp
-from tensorflow.keras.layers import Input, Dense
-from src.metrics import compute_crpsum, compute_energy
+import properscoring as ps
+from tensorflow.keras.layers import Input, Dense, LSTM
 import time
-import bootstrapped.bootstrap as bs
-import bootstrapped.stats_functions as bs_stats
-
+from src.metrics import compute_crpsum, compute_energy
 tfd = tfp.distributions
 tfb = tfp.bijectors
 
@@ -46,10 +43,63 @@ def Conditional_Coupling(horizon, pdf_dim, cond_dim, coupling_layers, hidden_dim
     return tf.keras.Model(inputs=cond_flow_input, outputs=[s_layer_last, t_layer_last])
 
 
-class FcFlow(tf.keras.Model):
+class MultiVariateLSTM:
+    def __init__(self, hyperparams: LSTMParameters, name: str, num_ts: int, history_length: int, horizon: int):
+        super(MultiVariateLSTM, self).__init__()
 
-    def __init__(self, fc_hyperparams: FCParameters, flow_hyperparams: FCFlowParameters, model_name: str, num_ts: int, history_length: int, horizon: int):
-        super(FcFlow, self).__init__()
+        self.hyperparams = hyperparams
+        self.name = name
+        self.num_ts = num_ts
+        self.history_length = history_length
+        self.input_size = self.num_ts+1
+        # inputs: A 3D tensor with shape [batch, timesteps, feature].
+
+        self.lstm_layers = []
+
+        for i in range(hyperparams.num_layer-1):
+            self.lstm_layers.append(
+                LSTM(units=hyperparams.hidden_units, dropout=hyperparams.dropout, return_sequences=True))
+        self.lstm_layers.append(
+            LSTM(units=hyperparams.hidden_units, dropout=hyperparams.dropout))
+        self.output_dense = Dense(self.num_ts*self.history_length)
+
+        inputs, outputs = self.get_model()
+        model = tf.keras.Model(inputs=inputs, outputs=outputs, name=name)
+        self.inputs = inputs
+        self.outputs = outputs
+        self.model = model
+
+    def get_model(self):
+        history_in = tf.keras.layers.Input(
+            shape=(self.num_ts, self.history_length), name='history')
+        time_of_day_in = tf.keras.layers.Input(
+            shape=(self.num_ts, self.history_length), name='time_of_day')
+        node_id_in = tf.keras.layers.Input(
+            shape=(self.num_ts, 1), dtype=tf.uint16, name='node_id')
+        time = tf.reshape(
+            time_of_day_in[:, 0, :], shape=[-1, 1, self.history_length])
+        lstm_input = tf.concat([history_in, time], axis=1)
+        lstm_input = tf.reshape(
+            lstm_input, shape=[-1, self.history_length, self.input_size])
+        lstm_output = self.lstm_layers[0](lstm_input)
+        for nbg in self.lstm_layers[1:]:
+            lstm_output = nbg(lstm_output)
+        forecast = self.output_dense(lstm_output)
+
+        forecast = tf.where(tf.math.is_nan(forecast),
+                            tf.zeros_like(forecast), forecast)
+        forecast = tf.reshape(
+            forecast, shape=[-1, self.num_ts, self.history_length])
+        inputs = {'history': history_in, 'node_id': node_id_in,
+                  'time_of_day': time_of_day_in}
+        outputs = {'targets': forecast}
+        return inputs, outputs
+
+
+class LSTMFlow(tf.keras.Model):
+
+    def __init__(self, lstm_hyperparams: LSTMParameters, flow_hyperparams: FCFlowParameters, model_name: str, num_ts: int, history_length: int, horizon: int):
+        super(LSTMFlow, self).__init__()
         self.pdf_dim = num_ts
         self.cond_dim = num_ts
         self.num_ts = num_ts
@@ -73,8 +123,8 @@ class FcFlow(tf.keras.Model):
         self.loss_tracker = tf.keras.metrics.Mean(name="loss")
         self.layers_list = [Conditional_Coupling(horizon=horizon, pdf_dim=self.pdf_dim, cond_dim=self.cond_dim, coupling_layers=flow_hyperparams.coupling_layers, hidden_dim=flow_hyperparams.hidden_coupling)
                             for i in range(self.num_coupling_layers)]
-        self.fcgaga = FcGaga(hyperparams=fc_hyperparams,
-                             name="fcgaga_model", num_ts=num_ts, history_length=history_length, horizon=horizon).model
+        self.lstm = MultiVariateLSTM(hyperparams=lstm_hyperparams,
+                                     name="lstm_model", num_ts=num_ts, history_length=history_length, horizon=horizon).model
 
     @property
     def metrics(self):
@@ -87,7 +137,7 @@ class FcFlow(tf.keras.Model):
 
     # data is a list of dict of inputs and outputs : [{nodeid, time, time features},{targets}]
     def call(self, data, training=True):
-        cond_forecast = self.fcgaga(data[0])['targets']
+        cond_forecast = self.lstm(data[0])['targets']
         target_x = data[1]['targets']
         # put pdf dim as last shape
         cond_forecast = tf.transpose(cond_forecast, perm=[0, 2, 1])
@@ -152,7 +202,7 @@ class FcFlow(tf.keras.Model):
     def get_ci_median(self, data_iter, num_samples=100):
         pred_result = []
         ground_true = []
-        ave_l = []
+        ave_l = [] = []
         for input_batch_dict, output_batch_dict in data_iter:
             samples_batch = self.get_batch_samples(input_batch_dict)
             size_batch = output_batch_dict['targets'].shape[0]
@@ -175,10 +225,10 @@ class FcFlow(tf.keras.Model):
 
             pred_result.append(ci_store)
             ground_true.append(output_batch_dict['targets'])
-        return pred_result, ground_true, np.mean(ave_l)
+        return pred_result, ground_true,  np.mean(ave_l)
 
     def get_batch_samples(self, batch_data, num_samples=100):
-        cond_forecast = self.fcgaga(batch_data)['targets']
+        cond_forecast = self.lstm(batch_data)['targets']
         cond_forecast = tf.transpose(cond_forecast, perm=[0, 2, 1])
         shape = cond_forecast.shape
 
@@ -219,10 +269,10 @@ class FcFlow(tf.keras.Model):
 
                     multivariate_sample = samples_batch[:, b, :, h]
                     multivariate_true_val = output_batch_dict['targets'][b, :, h]
-                    
+                    start_energy = time.time()
                     energy.append(compute_energy(
                         multivariate_sample, multivariate_true_val))
-                    
+                    end_energy = time.time()
 
                     crps.append(compute_crpsum(
                         multivariate_sample, multivariate_true_val))

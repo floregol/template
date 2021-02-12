@@ -14,6 +14,13 @@ def plot_time_series_pdf(ts, pdf_ts, list_index_ts):
         plt.plot(list_index_ts[1], sample, 'o', markersize=1)
     plt.show()
 
+def plot_time_series_ci(ts, ci_ts, list_index_ts):
+    plt.plot(list_index_ts[0], ts)
+    pred_y = [i[1] for i in ci_ts]
+    lower_ci = [i[0] for i in ci_ts]
+    upper_ci = [i[2] for i in ci_ts]
+    plt.fill_between(list_index_ts[1], lower_ci, upper_ci, color='b', alpha=.1)
+    plt.show()
 
 def visualize_dataset(X_train, Y_train, X_valid, Y_valid, X_test, Y_test):
 

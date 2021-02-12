@@ -7,7 +7,7 @@ from src.model.hyperparameter import FCParameters
 class FcGaga:
     def __init__(self, hyperparams: FCParameters, name: str, num_ts: int, history_length: int, horizon: int):
         super(FcGaga, self).__init__()
-        tf.config.run_functions_eagerly(False)
+        
 
         self.hyperparams = hyperparams
         self.name = name
