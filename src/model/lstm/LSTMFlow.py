@@ -1,6 +1,8 @@
+import os
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
 import tensorflow as tf
 import numpy as np
-import os
 from src.model.hyperparameter import LSTMParameters, FCFlowParameters
 import tensorflow_probability as tfp
 import properscoring as ps

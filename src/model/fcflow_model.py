@@ -1,6 +1,8 @@
 
 from src.model.fcgaga.FCGAGA import FcGaga
 from src.model.fcgaga.FCFlow import FcFlow
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
 import tensorflow as tf
 import numpy as np
 from src.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci

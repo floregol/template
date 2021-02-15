@@ -14,7 +14,7 @@ def load_elec_data(dataset_path: str):
     elec_dataset = ElectricityDataset.load()
     metadata = {'ids': elec_dataset.ids, 'dates': elec_dataset.dates}
     data_raw = elec_dataset.values
-    return metadata, data_raw_ts
+    return metadata, data_raw
 # Todo move to class
 
 

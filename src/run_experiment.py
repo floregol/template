@@ -9,7 +9,7 @@ from src.model.hyperparameter import *
 from src.plotting import visualize_dataset
 from src.model.data_helper import *
 from src.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
-
+from src.hp_tuning import run_hp_tuning
 general_hyperparams = GeneralParameters(
     epochs=45,
     steps_per_epoch=100,
@@ -49,24 +49,27 @@ def run(data_path, result_path, run_configuration, data_configuration):
     print('Loading data time : ', "%{:10.4f}".format(
         (time.time()-start_data_time)/1000), 'sec')
     trials_results = []
-    if run_configuration['cpu_mp']:
-        # build trial_args
-
-        for trial in range(run_configuration['num_trials']):
-            # check memory increased
-            # m = starmap(run_trial, num)
-            print(m)
-
+    if run_configuration['run_mode'] == 'hp_tuning':
+        run_hp_tuning(data, data_configuration, run_configuration['model'])
     else:
-        for trial in range(run_configuration['num_trials']):
-            # check memory
-            trial_results = run_trial(
-                trial, data, data_configuration, run_configuration['model'])
+        if run_configuration['cpu_mp']:
+            # build trial_args
 
-            trials_results.append(trial_results)
+            for trial in range(run_configuration['num_trials']):
+                # check memory increased
+                # m = starmap(run_trial, num)
+                print(m)
 
-    # store final results.
-    store_final_results(result_path, trials_results)
+        else:
+            for trial in range(run_configuration['num_trials']):
+                # check memory
+                trial_results = run_trial(
+                    trial, data, data_configuration, run_configuration['model'])
+
+                trials_results.append(trial_results)
+
+        # store final results.
+        store_final_results(result_path, trials_results)
 
 
 def run_trial(trial: int, data, data_configuration: dict, model_name: str):
@@ -137,3 +140,4 @@ def run_trial(trial: int, data, data_configuration: dict, model_name: str):
 
 #     plot_time_series_ci(true_signal, predict_signal, list_index_ts=[
 #         truth_index, predict_index])
+

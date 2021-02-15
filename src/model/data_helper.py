@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def construct_node_id_feature(num_time_series, num_train, num_val, num_test):
     node_id = np.array([i for i in range(num_time_series)]).reshape(-1, 1)
     node_id_train = np.repeat(
@@ -28,12 +29,13 @@ def construct_input_output_keras_dict(X_train, Y_train, X_valid, Y_valid, X_test
 
 
 class IterData():
-    def __init__(self, input_dict, output_dict, batch_size):
+    def __init__(self, input_dict, output_dict, batch_size, verbose=True):
         self.input_dict = input_dict
         self.output_dict = output_dict
         self.batch_size = batch_size
         self.end_index = int(0.2*(input_dict['history'].shape[0]))
         self.counter = 0
+        self.verbose = verbose
 
     def __iter__(self):
         return self
@@ -44,7 +46,8 @@ class IterData():
         if end_batch > self.end_index:
             raise StopIteration
         self.counter = end_batch
-        print(end_batch, '/', self.end_index)
+        if self.verbose:
+            print(end_batch, '/', self.end_index)
         input_batch_dict = {'history': self.input_dict['history'][start_batch:end_batch, :, :],
                             'time_of_day': self.input_dict['time_of_day'][start_batch:end_batch, :, :], 'node_id': self.input_dict['node_id'][start_batch:end_batch]}
         output_batch_dict = {
