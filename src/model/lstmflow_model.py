@@ -1,12 +1,13 @@
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
+import tensorflow as tf
 from src.model.data_helper import *
-from src.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
+from src.evaluation.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
 from src.model.hyperparameter import *
 import numpy as np
 from src.model.lstm.LSTMFlow import LSTMFlow
 import os
-from silence_tensorflow import silence_tensorflow
-silence_tensorflow()
-import tensorflow as tf
+
 
 def run_lstmflow(X_train, Y_train, X_valid, Y_valid, X_test,
                  Y_test, num_time_series, data_configuration, lstm_hyperparams, flow_hyperparams, verbose=True):

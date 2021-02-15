@@ -23,7 +23,7 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
     Y_test = data.scale_ts(Y_test, ts_scaler_computed_from_train)
 
     def black_box_function(num_flow_coupling, hidden_coupling, coupling_layers, init_learning_rate, num_layer, hidden_units, dropout):
-        num_flow_coupling = int(2*num_flow_coupling)
+        num_flow_coupling = 2*int(num_flow_coupling)
         hidden_coupling = int(hidden_coupling)
         coupling_layers = int(coupling_layers)
         num_layer = int(num_layer)
@@ -45,7 +45,7 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
 
         test_data_iter = IterData(x_test_dict, y_test_dict, 16, verbose=False)
         crp_sum, energy = tf_model.get_crps(test_data_iter)
-        return crp_sum
+        return -crp_sum
 
     pbounds = {'num_flow_coupling': (1, 5), 'hidden_coupling': (4, 64), 'coupling_layers': (
         2, 10), 'init_learning_rate': (1e-5, 1e-2), 'num_layer': (1, 3), 'hidden_units': (8, 64), 'dropout': (0.1, 0.7)}
@@ -57,8 +57,8 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
     )
 
     s = optimizer.maximize(
-        init_points=2,
-        n_iter=2,
+        init_points=5,
+        n_iter=10,
     )
 
     print(s)

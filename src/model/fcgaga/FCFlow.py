@@ -7,7 +7,7 @@ from src.model.hyperparameter import FCParameters, FCFlowParameters
 from src.model.fcgaga.FCGAGA import FcGaga
 import tensorflow_probability as tfp
 from tensorflow.keras.layers import Input, Dense
-from src.metrics import compute_crpsum, compute_energy
+from src.evaluation.metrics import compute_crpsum, compute_energy
 import time
 import bootstrapped.bootstrap as bs
 import bootstrapped.stats_functions as bs_stats

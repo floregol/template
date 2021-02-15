@@ -8,7 +8,7 @@ import tensorflow_probability as tfp
 import properscoring as ps
 from tensorflow.keras.layers import Input, Dense, LSTM
 import time
-from src.metrics import compute_crpsum, compute_energy
+from src.evaluation.metrics import compute_crpsum, compute_energy
 tfd = tfp.distributions
 tfb = tfp.bijectors
 

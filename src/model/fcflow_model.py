@@ -5,7 +5,7 @@ from silence_tensorflow import silence_tensorflow
 silence_tensorflow()
 import tensorflow as tf
 import numpy as np
-from src.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
+from src.evaluation.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
 from src.model.data_helper import *
 
 

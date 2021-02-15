@@ -4,10 +4,10 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import pickle as pkl
-from src.electricity import ElectricityDataset
+from src.dataset.electricity import ElectricityDataset
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from src.plotting import plot_time_series
+from src.evaluation.plotting import plot_time_series
 
 
 def load_elec_data(dataset_path: str):
