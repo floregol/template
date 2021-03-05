@@ -28,9 +28,9 @@ check_path(log_path)
 
 
 run_configuration = {'run_mode': 'hp_tuning',  # test_mode, multi_trials, hp_tuning
-                     'cpu_mp': False, 'cores': 4, 'num_trials': 10, 'model': 'FCFlow'}
+                     'cpu_mp': False, 'cores': 4, 'num_trials': 10, 'model': 'LSTMFlow'}
 
-data_configuration = {'dataset_name': 'elec', 'horizon': 12, 'history': 12}
+data_configuration = {'dataset_name': 'synthetic', 'horizon': 4, 'history': 4}
 
 run(data_path, result_path, run_configuration, data_configuration)
 

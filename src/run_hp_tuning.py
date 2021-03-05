@@ -13,7 +13,6 @@ general_hyperparams = GeneralParameters(
 def run_hp_tuning(data, data_configuration: dict, model_name: str):
     X_train, Y_train, X_valid, Y_valid, X_test, Y_test, ts_scaler_computed_from_train = data.get_train_val_test_split()
     num_time_series = X_train.shape[1]
-    # visualize_dataset(X_train, Y_train, X_valid, Y_valid, X_test, Y_test)
     # data preparation
     X_train = data.scale_ts(X_train, ts_scaler_computed_from_train)
     Y_train = data.scale_ts(Y_train, ts_scaler_computed_from_train)
@@ -22,12 +21,14 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
     X_test = data.scale_ts(X_test, ts_scaler_computed_from_train)
     Y_test = data.scale_ts(Y_test, ts_scaler_computed_from_train)
 
-    def black_box_function(num_flow_coupling, hidden_coupling, coupling_layers, init_learning_rate, num_layer, hidden_units, dropout):
+    def black_box_function(num_flow_coupling, coupling_layers, init_learning_rate, num_layer, hidden_units, dropout):
         num_flow_coupling = 2*int(num_flow_coupling)
-        hidden_coupling = int(hidden_coupling)
+        hidden_coupling = 4
         coupling_layers = int(coupling_layers)
         num_layer = int(num_layer)
         hidden_units = int(hidden_units)
+        print('\t\t   ', coupling_layers, '| {:10.2f}'.format(dropout), ' | ', hidden_units, ' | {:10.4f}'.format(
+              init_learning_rate), ' | ', num_flow_coupling, ' | ', num_layer)
         flow_hyperparams = FCFlowParameters(num_flow_coupling=num_flow_coupling,
                                             hidden_coupling=hidden_coupling,
                                             coupling_layers=coupling_layers)
@@ -47,8 +48,8 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
         crp_sum, energy = tf_model.get_crps(test_data_iter)
         return -crp_sum
 
-    pbounds = {'num_flow_coupling': (1, 5), 'hidden_coupling': (4, 64), 'coupling_layers': (
-        2, 10), 'init_learning_rate': (1e-5, 1e-2), 'num_layer': (1, 3), 'hidden_units': (8, 64), 'dropout': (0.1, 0.7)}
+    pbounds = {'num_flow_coupling': (1, 5),  'coupling_layers': (
+        2, 10), 'init_learning_rate': (1e-5, 1e-1), 'num_layer': (1, 3), 'hidden_units': (8, 64), 'dropout': (0.1, 0.7)}
 
     optimizer = BayesianOptimization(
         f=black_box_function,
@@ -61,9 +62,8 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
         n_iter=10,
     )
 
-    print(s)
 
-
+# TODO another package to fine tune
 
 # from ray import tune
 
