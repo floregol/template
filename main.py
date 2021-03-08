@@ -5,8 +5,8 @@ current_dir = os.getcwd()
 
 # todo result_path arguments from input
 
-data_path = os.path.join(current_dir, 'data')
-#data_path = '/home/floregol/scratch/data'
+#data_path = os.path.join(current_dir, 'data')
+data_path = '/home/floregol/scratch/data'
 result_path = os.path.join(current_dir, 'results')
 run_configuration = {'run_mode': 'hp_tuning',  # test_mode, multi_trials, hp_tuning
                      'cpu_mp': False, 'cores': 4, 'num_trials': 10, 'model': 'FCFlow'}

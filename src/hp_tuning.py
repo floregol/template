@@ -13,8 +13,6 @@ general_hyperparams = GeneralParameters(
 def run_hp_tuning(data, data_configuration: dict, model_name: str):
     X_train, Y_train, X_valid, Y_valid, X_test, Y_test, ts_scaler_computed_from_train = data.get_train_val_test_split()
     num_time_series = X_train.shape[1]
-    # visualize_dataset(X_train, Y_train, X_valid, Y_valid, X_test, Y_test)
-    # data preparation
     X_train = data.scale_ts(X_train, ts_scaler_computed_from_train)
     Y_train = data.scale_ts(Y_train, ts_scaler_computed_from_train)
     X_valid = data.scale_ts(X_valid, ts_scaler_computed_from_train)
@@ -57,8 +55,8 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
     )
 
     s = optimizer.maximize(
-        init_points=5,
-        n_iter=10,
+        init_points=1,
+        n_iter=2,
     )
 
     print(s)
