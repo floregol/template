@@ -4,30 +4,30 @@ import pandas as pd
 from datetime import datetime
 import numpy as np
 import pickle as pkl
-from src.electricity import ElectricityDataset
+from src.dataset.electricity import ElectricityDataset
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from src.plotting import plot_time_series
+from src.evaluation.plotting import plot_time_series
+from src.synthetic.generate_valve import generate_TS
+from src.files_utils import if_not_load_generate_and_store
 
 
 def load_elec_data(dataset_path: str):
     elec_dataset = ElectricityDataset.load()
     metadata = {'ids': elec_dataset.ids, 'dates': elec_dataset.dates}
     data_raw = elec_dataset.values
-    return metadata, data_raw
+    return metadata, data_raw  # [num_ts, num_timesteps]
 # Todo move to class
 
 
+def load_synthetic_data(dataset_path: str, num_timesteps: int = 2000):
+    data_raw = generate_TS(time_serie_length=num_timesteps)
+    num_ts = data_raw.shape[0]
+    metadata = {'ids': list(range(num_ts)),
+                'dates': list(range(num_timesteps))}
+    return metadata, data_raw  # [num_ts, num_timesteps]
+
 # Load from files if already generated, else need to generate and store.
-def if_not_load_generate_and_store(file_store_path: str, generate_func):
-    if os.path.exists(file_store_path):
-        with open(file_store_path, 'rb') as f:
-            data_dict_store = pkl.load(f)
-    else:
-        print(file_store_path, ' is not there, generating')
-        data_dict_store = generate_func()
-        pkl.dump(data_dict_store, open(file_store_path, "wb"))
-    return data_dict_store
 
 
 class Dataset():
@@ -36,18 +36,16 @@ class Dataset():
         self.name = name
         self.load_dataset = load_dataset
         self.partition_ratio = {'train': 0.6, 'test': 0.3, 'val': 0.1}
-
-        self.file_store_path = os.path.join(dataset_path, 'elec_data.pkl')
         data_dict = if_not_load_generate_and_store(
-            self.file_store_path, self.generate_dataset)
+            dataset_path, name+'_data.pkl', self.generate_dataset)
         self.metadata = data_dict['metadata']
         self.np_data = data_dict['np_data']
-        # reduce data, only take 100 first time stepd
-        self.np_data = self.np_data[:, 0:1000]
+        # reduce data, only take 200 first time steps
 
-        XY_store_path = os.path.join(dataset_path, 'elec_XY.pkl')
+        self.np_data = self.np_data[:, 0:2000]
+
         XY_dict = if_not_load_generate_and_store(
-            XY_store_path, self.generate_X_Y)
+            dataset_path, name+'_XY.pkl', self.generate_X_Y)
         self.X = XY_dict['X']
         self.Y = XY_dict['Y']
 
@@ -159,13 +157,14 @@ class TimeSerieDataset(Dataset):
         return X_train, Y_train, X_valid, Y_valid, X_test, Y_test, ts_scaler_computed_from_train
 
     def scale_ts(self,  multi_ts, ts_scaler_computed_from_train):
-        multi_ts[:, :, :, 0] =  multi_ts[:, :, :, 0] / ts_scaler_computed_from_train[:, np.newaxis]
+        multi_ts[:, :, :, 0] = multi_ts[:, :, :, 0] / \
+            ts_scaler_computed_from_train[:, np.newaxis]
         return multi_ts
 
         # take a X Y pair and plot to see if it fits the initial ts.
 
     def verify_X_Y_split_done_right(self, X, Y, offset_start_XY_ts=0, plot_ts=False):
-        univar_ts_index = 6  # Select one of the time series
+        univar_ts_index = 1  # Select one of the time series
         start_index = 42  # timestamp index
         ts_input = X[start_index, univar_ts_index, :, 0]
         ts_output = Y[start_index, univar_ts_index, :, 0]
@@ -193,4 +192,7 @@ def load_data(data_path: str, data_configuration: dict) -> Dataset:
     if dataset_name == 'elec':
         dataset = TimeSerieDataset(
             dataset_path, dataset_name, load_elec_data, history=data_configuration['history'], horizon=data_configuration['horizon'])
+    elif dataset_name == 'synthetic':
+        dataset = TimeSerieDataset(dataset_path, dataset_name, load_synthetic_data,
+                                   history=data_configuration['history'], horizon=data_configuration['horizon'])
     return dataset

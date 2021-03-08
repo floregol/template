@@ -5,7 +5,7 @@ from silence_tensorflow import silence_tensorflow
 silence_tensorflow()
 import tensorflow as tf
 import numpy as np
-from src.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
+from src.evaluation.plotting import plot_time_series, plot_time_series_pdf, plot_time_series_ci
 from src.model.data_helper import *
 
 
@@ -25,8 +25,7 @@ def run_fcflow(X_train, Y_train, X_valid, Y_valid, X_test,
                             epochs=fc_hyperparams.epochs,
                             steps_per_epoch=fc_hyperparams.steps_per_epoch,
                             verbose=verbose)
-    fcflow.summary()
-
+    
     return fcflow, x_test_dict, y_test_dict
 
 
@@ -36,7 +35,6 @@ def run_fcgaga(X_train, Y_train, X_valid, Y_valid, X_test,
     fc_model = FcGaga(hyperparams=fc_hyperparams,
                       name="fcgaga_model", num_ts=num_time_series, history_length=data_configuration['history'], horizon=data_configuration['horizon'])
 
-    print(fc_model.model.summary())
 
     x_train_dict, y_train_dict, x_val_dict, y_val_dict, x_test_dict, y_test_dict = construct_input_output_keras_dict(X_train, Y_train, X_valid, Y_valid, X_test,
                                                                                                                      Y_test, num_time_series)
