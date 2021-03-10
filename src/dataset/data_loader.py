@@ -42,7 +42,7 @@ class Dataset():
         self.np_data = data_dict['np_data']
         # reduce data, only take 200 first time steps
 
-        self.np_data = self.np_data[:, 0:2000]
+        self.np_data = self.np_data[:, 0:1000]
 
         XY_dict = if_not_load_generate_and_store(
             dataset_path, name+'_XY.pkl', self.generate_X_Y)
@@ -162,6 +162,14 @@ class TimeSerieDataset(Dataset):
         return multi_ts
 
         # take a X Y pair and plot to see if it fits the initial ts.
+    def scale_all_ts(self, X_train, Y_train, X_valid, Y_valid, X_test, Y_test, ts_scaler_computed_from_train):
+        X_train = self.scale_ts(X_train, ts_scaler_computed_from_train)
+        Y_train = self.scale_ts(Y_train, ts_scaler_computed_from_train)
+        X_valid = self.scale_ts(X_valid, ts_scaler_computed_from_train)
+        Y_valid = self.scale_ts(Y_valid, ts_scaler_computed_from_train)
+        X_test = self.scale_ts(X_test, ts_scaler_computed_from_train)
+        Y_test = self.scale_ts(Y_test, ts_scaler_computed_from_train)
+        return X_train, Y_train, X_valid, Y_valid, X_test, Y_test
 
     def verify_X_Y_split_done_right(self, X, Y, offset_start_XY_ts=0, plot_ts=False):
         univar_ts_index = 1  # Select one of the time series

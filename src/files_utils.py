@@ -3,9 +3,11 @@ from os import path
 import pickle as pkl
 
 
-def check_path(path_dir):
+def check_path(path_dir, verbose=False, path_description=None):
     if not path.exists(path_dir):
         os.mkdir(path_dir)
+    if verbose:
+        print(path_description, ':', path_dir)
 
 
 def if_not_load_generate_and_store(store_path: str, filename: str, generate_func):

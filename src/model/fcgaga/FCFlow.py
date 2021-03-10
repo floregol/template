@@ -3,7 +3,7 @@ silence_tensorflow()
 import tensorflow as tf
 import numpy as np
 import os
-from src.model.hyperparameter import FCParameters, FCFlowParameters
+from src.model.hyperparameter import FCParameters, FlowParameters
 from src.model.fcgaga.FCGAGA import FcGaga
 import tensorflow_probability as tfp
 from tensorflow.keras.layers import Input, Dense
@@ -50,7 +50,7 @@ def Conditional_Coupling(horizon, pdf_dim, cond_dim, coupling_layers, hidden_dim
 
 class FcFlow(tf.keras.Model):
 
-    def __init__(self, fc_hyperparams: FCParameters, flow_hyperparams: FCFlowParameters, model_name: str, num_ts: int, history_length: int, horizon: int):
+    def __init__(self, fc_hyperparams: FCParameters, flow_hyperparams: FlowParameters, model_name: str, num_ts: int, history_length: int, horizon: int):
         super(FcFlow, self).__init__()
         self.pdf_dim = num_ts
         self.cond_dim = num_ts

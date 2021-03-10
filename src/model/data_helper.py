@@ -33,7 +33,7 @@ class IterData():
         self.input_dict = input_dict
         self.output_dict = output_dict
         self.batch_size = batch_size
-        self.end_index = int(0.2*(input_dict['history'].shape[0]))
+        self.end_index = input_dict['history'].shape[0]
         self.counter = 0
         self.verbose = verbose
 

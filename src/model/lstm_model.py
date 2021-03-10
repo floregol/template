@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def run_lstm():
-    
+
+def run_lstm(X_train, Y_train, X_valid, Y_valid, X_test,
+             Y_test, num_time_series, data_configuration, fc_hyperparams, verbose=True):
+
     print("TensorFlow version: {}".format(tf.__version__))
     print("Eager execution: {}".format(tf.executing_eagerly()))
-
-    
 
     # these are just made up hyperparameters, change them as you wish
     hidden_size = 4
