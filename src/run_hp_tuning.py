@@ -3,7 +3,7 @@ import numpy as np
 from src.model.lstmflow_model import run_lstmflow
 from src.model.hyperparameter import *
 from src.model.data_helper import *
-
+from src.evaluation.eval import eval_results, get_prediction
 
 # transform continuous to float value
 def adjust_hp_param(num_flow_coupling, coupling_layers, init_learning_rate, num_layer, hidden_units, dropout):
@@ -45,9 +45,10 @@ def run_hp_tuning(data, data_configuration: dict, model_name: str):
         tf_model, x_test_dict, y_test_dict = run_lstmflow(X_train, Y_train, X_valid, Y_valid, X_test,
                                                           Y_test, num_time_series, data_configuration, lstm_hyperparams, flow_hyperparams, verbose=False)
 
-        test_data_iter = IterData(x_test_dict, y_test_dict, 16, verbose=False)
-        crp_sum, energy = tf_model.get_crps(test_data_iter)
-        return -crp_sum
+        prediction_test = get_prediction(tf_model, x_test_dict, y_test_dict)
+    
+        metrics_dict, _ = eval_results(prediction_test)
+        return -np.mean(metrics_dict['coverage'])
 
     pbounds = {'num_flow_coupling': (1, 5),  'coupling_layers': (
         2, 10), 'init_learning_rate': (1e-5, 1e-1), 'num_layer': (1, 3), 'hidden_units': (8, 64), 'dropout': (0.1, 0.7)}

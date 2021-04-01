@@ -47,7 +47,7 @@ class AllParameters(NamedTuple):
 
 
 def get_default_hyperparam(dataset_name, run_mode='multi_trials'):
-    epochs = 45
+    epochs = 60
     steps_per_epoch = 100
     batch_size = 4
     init_learning_rate = 5e-3

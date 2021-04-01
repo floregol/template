@@ -22,7 +22,7 @@ def run(data_path, result_path, run_configuration, data_configuration):
         store_hp_results(result_path, dict_to_store)
         eval_hp_results(result_path)
     else:
-        if run_configuration['cpu_mp']:  # TODO add mp
+        if run_configuration['cpu_mp']:  # TODO add multiprocessing
             # build trial_args
 
             for trial in range(run_configuration['num_trials']):
@@ -35,9 +35,8 @@ def run(data_path, result_path, run_configuration, data_configuration):
                 # check memory
                 trial_results = run_trial(
                     trial, data, data_configuration, run_configuration, result_path)
-                store_intermediate_results(trial_results) 
+               # store_intermediate_results(trial_results)  #TODO
                 trials_results.append(trial_results)
 
         # store final results to files.
         store_final_results(result_path, trials_results)
-        eval_results(result_path)

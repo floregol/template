@@ -1,13 +1,14 @@
-from src.model.lstm_model import run_lstm
-from src.model.fcflow_model import run_fcflow, run_fcgaga
-from src.model.lstm.LSTMFlow import LSTMFlow
-from src.model.lstmflow_model import run_lstmflow
-from src.model.hyperparameter import *
-from src.model.data_helper import *
-from src.evaluation.eval import eval_results, get_prediction
 from silence_tensorflow import silence_tensorflow
 silence_tensorflow()
 from tensorflow import keras
+from src.evaluation.eval import eval_results, get_prediction
+from src.model.data_helper import *
+from src.model.hyperparameter import *
+from src.model.lstmflow_model import run_lstmflow
+from src.model.lstm.LSTMFlow import LSTMFlow
+from src.model.fcflow_model import run_fcflow, run_fcgaga
+from src.model.lstm_model import run_lstm
+
 
 def run_trial(trial: int, data, data_configuration: dict, run_configuration: dict, result_path: str):
     model_name = run_configuration['model']
@@ -35,9 +36,9 @@ def run_trial(trial: int, data, data_configuration: dict, run_configuration: dic
                                                           Y_test, num_time_series, data_configuration, hyperparam.lstm, hyperparam.flow)
     else:
         print('no model bb')
-    
+
     prediction_test = get_prediction(tf_model, x_test_dict, y_test_dict)
-    print(len(prediction_test))
-    # TODO store pred
+    # store 
+    
     result_store = eval_results(prediction_test)
     return result_store

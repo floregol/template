@@ -1,11 +1,13 @@
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
 from src.model.data_helper import *
 from src.evaluation.metrics import *
+from src.evaluation.plotting import plot_input_output_batch
 import numpy as np
 import tensorflow as tf
 import time
 import tensorflow_probability as tfp
-from silence_tensorflow import silence_tensorflow
-silence_tensorflow()
+
 
 tfd = tfp.distributions
 tfb = tfp.bijectors
@@ -26,57 +28,18 @@ def get_prediction(model, x_test_dict, y_test_dict):
 
 
 def eval_results(batch_test_predictions):
-
+    metrics_dict = {'coverage':[]}
+    ci = []
     for _, ground, samples in batch_test_predictions:
-        mean_crps, mean_energy = get_metrics(ground, samples)
+        #mean_crps, mean_energy = get_metrics(ground, samples)
         ci_store, _,  coverage = get_ci_median(ground, samples)
-    print()
-    # pred_result, ground_true, coverage = get_ci_median(
-    #     IterData(x_test_dict, y_test_dict, 16))
-    # print(coverage)
-
-    # print(pred_result)
-    # print('xtest,', X_test.shape)
-    # truth_index = list(
-    #     range(0, data_configuration['history']+ci_size))
-    # predict_index = list(
-    #     range(data_configuration['history'], data_configuration['history']+ci_size))
-    # predict_signal = list(pred_result[0][0:ci_size, 0, 0, :])
-
-    # true_signal = list(X_test[0, 0, :, 0])+list(Y_test[0:ci_size, 0, 0, 0])
-
-    # plot_time_series_ci(true_signal, predict_signal, list_index_ts=[
-    #     truth_index, predict_index])
-
-    # test_data_iter = IterData(x_test_dict, y_test_dict, 16)
-    # crp_sum = fcflow.get_crps(test_data_iter)
-    # print("crp sum : ", crp_sum)
-
-    # pred_result, ground_true = fcflow.get_ci_median(
-    #     IterData(x_test_dict, y_test_dict, 16))
-
-    # truth_index = list(
-    #     range(0, data_configuration['history']+data_configuration['horizon']))
-    # predict_index = list(
-    #     range(data_configuration['history'], data_configuration['history']+data_configuration['horizon']))
-    # predict_signal = list(pred_result[0][0, :, 0, :])
-    # print(predict_signal)
-    # true_signal = list(X_test[0, 0, :, 0])+list(Y_test[0, 0, :, 0])
-
-    # plot_time_series_ci(true_signal, predict_signal, list_index_ts=[
-    #     truth_index, predict_index])
-
-    # forward pass; from normal -> flow -> end result
+        metrics_dict['coverage'].append(coverage)
+        ci.append(ci_store)
+    #print('Average coverage',np.mean(metrics_dict['coverage']))
+   # plot_input_output_batch(batch_test_predictions, ci)
+    return metrics_dict, ci
 
 
-def get_samples(data_iter, num_samples=100):
-    sampled_prediction = []
-    for input_batch_dict, output_batch_dict in data_iter:
-
-        sampled_prediction.append(get_batch_samples(
-            batch_data=input_batch_dict, num_samples=num_samples))
-
-    return sampled_prediction
 
 
 def get_ci_median(output_batch_dict, samples_batch):
@@ -90,7 +53,6 @@ def get_ci_median(output_batch_dict, samples_batch):
     ci_store = np.zeros((size_batch, horizon, num_time_series, 3))
     batch_result = []
     for b in range(size_batch):
-        print(b, '/', size_batch)
         horizon_result = []
         for h in range(horizon):
             dim_result = []

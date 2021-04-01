@@ -1,3 +1,5 @@
+from silence_tensorflow import silence_tensorflow
+silence_tensorflow()
 import os
 import tensorflow as tf
 import numpy as np
@@ -7,8 +9,7 @@ import properscoring as ps
 from tensorflow.keras.layers import Input, Dense, LSTM
 import time
 from src.evaluation.metrics import compute_crpsum, compute_energy
-from silence_tensorflow import silence_tensorflow
-silence_tensorflow()
+
 
 
 tfd = tfp.distributions

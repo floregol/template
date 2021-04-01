@@ -29,7 +29,7 @@ def construct_input_output_keras_dict(X_train, Y_train, X_valid, Y_valid, X_test
 
 
 class IterData():
-    def __init__(self, input_dict, output_dict, batch_size, verbose=True):
+    def __init__(self, input_dict, output_dict, batch_size, verbose=False):
         self.input_dict = input_dict
         self.output_dict = output_dict
         self.batch_size = batch_size
