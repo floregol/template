@@ -21,3 +21,7 @@ def if_not_load_generate_and_store(store_path: str, filename: str, generate_func
         data_dict_store = generate_func()
         pkl.dump(data_dict_store, open(file_store_path, "wb"))
     return data_dict_store
+
+def store_file(store_path: str, filename: str, file_to_store:dict):
+    file_store_path = os.path.join(store_path,filename)
+    pkl.dump(file_to_store, open(file_store_path, "wb"))

@@ -4,10 +4,11 @@ import os
 import sys
 import time
 from src.files_utils import check_path
+
 import argparse
 
 YOUR_MACHINE = 'flo-XPS-13-9360'
-
+DESKTOP = 'floregol-XPS-8930'
 # Parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--f', action='store_true',
@@ -18,7 +19,7 @@ stdout_to_file = args.f
 machine = os.uname()[1]
 print('We are on', machine)
 
-if machine == YOUR_MACHINE: # set up local machine path here
+if machine in [YOUR_MACHINE,DESKTOP ]: # set up local machine path here
     current_dir = os.getcwd()
     data_path = os.path.join(current_dir, 'data')
     result_path = os.path.join(current_dir, 'results')
@@ -37,11 +38,14 @@ if stdout_to_file:
     sys.stdout = open(log_file, 'w')
 
 
-run_configuration = {'run_mode': 'hp_tuning',  # test_mode, multi_trials, hp_tuning
-                     'cpu_mp': False, 'cores': 4, 'num_trials': 1, 'model': 'LSTMFlow'}
+run_configuration = {'run_mode': 'multi_trials',  # test_mode, multi_trials, hp_tuning
+                    'num_trials': 20}
 
-data_configuration = {'dataset_name': 'synthetic', 'horizon': 4, 'history': 4}
+run_trial_fun =  lambda trial, x : 0
+list_arg_trial_fun = [{}]
+#list_arg_trial_fun = [{'diffusion_lambda':-3, 'diff':True},{'diffusion_lambda':0.5482,'diff':True}]
 
-run(data_path, result_path, run_configuration, data_configuration)
+
+run(result_path, run_configuration, run_trial_fun, list_arg_trial_fun)
 if stdout_to_file:
     sys.stdout.close()
